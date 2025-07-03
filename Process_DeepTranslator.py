@@ -17,7 +17,7 @@ Hard = ["Five", "Six"]
 
 medium_var = 0.5
 hard_var = 0.4
-desired_len = 37
+desired_len = 50
 
 
 def load_cached_words():
@@ -161,6 +161,7 @@ print(f"Selected {len(Final_Question)} words for quiz")
 
 date = time.time()
 date = time.ctime(date)
+
 def create_vocab_form(word_list, filename="vocab_form.pdf", boxes = desired_len):
     # Create PDF canvas
     c = canvas.Canvas(filename, pagesize=A4)
@@ -257,14 +258,22 @@ def create_answer_key(word_list, filename="vocab_answer_key.pdf", boxes = desire
                 text_width = c.stringWidth(english, "Helvetica-Bold", 12)
                 center_x = x + (box_width - text_width) / 2
                 center_y = y - 25  # Vertically center in box
+                
+
+                url = f"https://www.google.com/search?q={english.lower()}+definition"
+                
+                # Draw the text as a link
                 c.drawString(center_x, center_y, english)
+                
+                # Add the hyperlink annotation
+                c.linkURL(url, (center_x, center_y - 5, center_x + text_width, center_y + 15))
+                
             else:
                 c.line(x + box_width, y, x, y - box_height)
             
     # Save PDF
     c.save()
     print(f"PDF saved as {filename}")
-
 def AudioCreation(word_list, desired_len, output_file="quiz_audio.mp3"):
     combined = AudioSegment.empty()
     silence = AudioSegment.silent(duration=1300)
@@ -272,22 +281,18 @@ def AudioCreation(word_list, desired_len, output_file="quiz_audio.mp3"):
     for i, word_data in enumerate(word_list):
         english_word = word_data[0]
         question_numero = f"Numero_Audio/Question{i+1}.mp3"  # Fixed: i+1 for proper numbering
-        
         # Check if question audio exists
         if os.path.exists(question_numero):
             question_audio = AudioSegment.from_mp3(question_numero)
         else:
             print(f"Warning: {question_numero} not found, skipping question number")
             question_audio = AudioSegment.empty()  # Use empty audio if file missing
-        
         word_file = f"Stored_Audio/{english_word}.mp3"
         if os.path.exists(word_file):
             word_audio = AudioSegment.from_mp3(word_file)
             combined += question_audio + silence + word_audio + silence
         else:
             print(f"Warning: {word_file} not found, skipping word")
-    
-    
     combined.export(output_file, format="mp3")
     print(f"Quiz audio saved as {output_file}")
 
